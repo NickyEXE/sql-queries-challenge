@@ -26,10 +26,11 @@ end
 
 def aliens_aboard_fastest_spaceship
   #return a list of the aliens aboard the fastest spaceship
-  "SELECT aliens.*, spaceships.* FROM aliens
-   INNER JOIN spaceships
+  "SELECT aliens.* FROM aliens
+   LEFT JOIN spaceships
    ON aliens.spaceship_id = spaceships.id
-   WHERE speed = (SELECT MAX(speed) FROM spaceships);"
+   WHERE spaceships.speed = (SELECT MAX(speed) FROM spaceships);"
+
 end
 
 
