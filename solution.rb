@@ -3,19 +3,25 @@
 
 def blue_aliens
    # return the names and colors of all the aliens that are 'blue'
+   "SELECT name, color FROM aliens WHERE color = 'blue';"
 end
 
 def old_aliens
    # return the names and ages of all aliens over the age of 100
+   "SELECT name, age FROM aliens WHERE age > 100;"
 end
 
 def dangerous_aliens
    # return the names of the dangerous aliens
+   "SELECT name FROM aliens WHERE dangerous = true;"
 end
 
 
 def fastest_spaceship
  # return all of the info about the fastest spaceship
+   "SELECT * FROM spaceships
+   ORDER BY speed DESC
+   LIMIT 1;"
 end
 
 def aliens_aboard_fastest_spaceship
