@@ -26,39 +26,76 @@ end
 
 def aliens_aboard_fastest_spaceship
   #return a list of the aliens aboard the fastest spaceship
+  "SELECT aliens.*, spaceships.* FROM aliens
+   INNER JOIN spaceships
+   ON aliens.spaceship_id = spaceships.id
+   WHERE speed = (SELECT MAX(speed) FROM spaceships);"
 end
 
 
 def aliens_and_spaceships
   # Return a list of all aliens and the spaceship they belong to
-
+   "SELECT aliens.name, spaceships.name FROM aliens
+   INNER JOIN spaceships
+   ON aliens.spaceship_id = spaceships.id;"
 end
 
 
 def aliens_and_planets
  # Get a list of all aliens and the planets they belong to
+ "SELECT aliens.name, planets.name FROM aliens
+ INNER JOIN spaceships
+ ON aliens.spaceship_id = spaceships.id
+ INNER JOIN planets
+ ON spaceships.planet_id = planets.id;"
 end
 
 
 def aliens_aboard_beebop
    # Get a list of all aliens aboard a the spaceship named 'Beebop'
+   "SELECT aliens.* FROM aliens
+   INNER JOIN spaceships
+   ON aliens.spaceship_id = spaceships.id
+   WHERE spaceships.name = 'Beebop';"
 end
 
 
 def aliens_from_gliese
    # Get a list of all aliens from the planet named 'Gliese'
+   "SELECT aliens.* FROM aliens
+   INNER JOIN spaceships
+   ON aliens.spaceship_id = spaceships.id
+   INNER JOIN planets
+   ON spaceships.planet_id = planets.id
+   WHERE planets.name = 'Gliese'
+   ;"
 end
 
 def spaceship_count_for_each_planet
   # Return each planet's name and how many spaceships are from each planet
+   "SELECT planets.name, COUNT(*) AS number_of_spaceships FROM planets
+  INNER JOIN spaceships
+  ON  spaceships.planet_id = planets.id
+  GROUP BY spaceships.planet_id;"
 end
 
 def alien_count_for_spaceships
     # Return each spaceships's name and how many aliens are aboard each spaceship
+    "SELECT spaceships.name, COUNT(*) AS number_of_aliens FROM spaceships
+    INNER JOIN aliens
+    ON spaceships.id = aliens.spaceship_id
+    GROUP BY spaceships.id;"
 end
 
 def alien_count_for_planets
-    # Return each planet's name and how many aliens are from each planet
+    #
+    "SELECT planets.name, COUNT(*) FROM aliens
+    LEFT JOIN spaceships
+    ON spaceships.id = aliens.spaceship_id
+    INNER JOIN planets
+    ON planets.id = spaceships.planet_id
+    GROUP BY planet_id;"
+
 end
 
 def order_planets_by_aliens
