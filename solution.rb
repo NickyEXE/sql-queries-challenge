@@ -3,104 +3,139 @@
 
 def blue_aliens
    # return the names and colors of all the aliens that are 'blue'
-   "SELECT name, color FROM aliens WHERE color = 'blue';"
+   <<-SQL
+   SELECT name, color FROM aliens
+   WHERE color = "blue";
+   SQL
 end
 
 def old_aliens
    # return the names and ages of all aliens over the age of 100
-   "SELECT name, age FROM aliens WHERE age > 100;"
+   <<-SQL
+   SELECT name, age FROM aliens
+   WHERE age > 100;
+   SQL
 end
 
 def dangerous_aliens
    # return the names of the dangerous aliens
-   "SELECT name FROM aliens WHERE dangerous = true;"
+   <<-SQL
+   SELECT name FROM aliens
+   WHERE dangerous = true;
+   SQL
 end
 
 
 def fastest_spaceship
  # return all of the info about the fastest spaceship
-   "SELECT * FROM spaceships
-   ORDER BY speed DESC
-   LIMIT 1;"
+ <<-SQL
+ SELECT * FROM spaceships
+ ORDER BY speed DESC
+ LIMIT 1;
+ SQL
 end
 
 def aliens_aboard_fastest_spaceship
-  #return a list of the aliens aboard the fastest spaceship
-  "SELECT aliens.* FROM aliens
-   LEFT JOIN spaceships
-   ON aliens.spaceship_id = spaceships.id
-   WHERE spaceships.speed = (SELECT MAX(speed) FROM spaceships);"
-
+  <<-SQL
+  SELECT aliens.* FROM aliens
+  INNER JOIN spaceships
+  ON spaceships.id = aliens.spaceship_id
+  WHERE spaceships.speed = (SELECT MAX(speed) FROM spaceships);
+  SQL
 end
 
 
 def aliens_and_spaceships
   # Return a list of all aliens and the spaceship they belong to
-   "SELECT aliens.name, spaceships.name FROM aliens
-   INNER JOIN spaceships
-   ON aliens.spaceship_id = spaceships.id;"
+  <<-SQL
+  SELECT aliens.*, spaceships.name FROM aliens
+  INNER JOIN spaceships
+  ON spaceships.id = aliens.spaceship_id;
+  SQL
 end
 
 
 def aliens_and_planets
  # Get a list of all aliens and the planets they belong to
- "SELECT aliens.name, planets.name FROM aliens
+ <<-SQL
+ SELECT aliens.*, planets.name FROM aliens
  INNER JOIN spaceships
- ON aliens.spaceship_id = spaceships.id
+ ON spaceships.id = aliens.spaceship_id
  INNER JOIN planets
- ON spaceships.planet_id = planets.id;"
+ ON spaceships.planet_id = planets.id;
+ SQL
 end
 
 
 def aliens_aboard_beebop
-   # Get a list of all aliens aboard a the spaceship named 'Beebop'
-   "SELECT aliens.* FROM aliens
+   # Get a list of all aliens aboard the spaceship named 'Beebop'
+   <<-SQL
+   SELECT aliens.* FROM aliens
    INNER JOIN spaceships
-   ON aliens.spaceship_id = spaceships.id
-   WHERE spaceships.name = 'Beebop';"
+   ON spaceships.id = aliens.spaceship_id
+   WHERE spaceships.name = "Beebop";
+   SQL
 end
 
 
 def aliens_from_gliese
    # Get a list of all aliens from the planet named 'Gliese'
-   "SELECT aliens.* FROM aliens
+   <<-SQL
+   SELECT aliens.* FROM aliens
    INNER JOIN spaceships
-   ON aliens.spaceship_id = spaceships.id
+   ON spaceships.id = aliens.spaceship_id
    INNER JOIN planets
    ON spaceships.planet_id = planets.id
-   WHERE planets.name = 'Gliese'
-   ;"
+   WHERE planets.name = "Gliese";
+   SQL
 end
 
 def spaceship_count_for_each_planet
   # Return each planet's name and how many spaceships are from each planet
-   "SELECT planets.name, COUNT(*) AS number_of_spaceships FROM planets
-  INNER JOIN spaceships
-  ON  spaceships.planet_id = planets.id
-  GROUP BY spaceships.planet_id;"
+  <<-SQL
+  SELECT planets.name, COUNT(spaceships.id) AS number_of_spaceships FROM spaceships
+  INNER JOIN planets
+  ON planets.id = spaceships.planet_id
+  GROUP BY planets.id
+  ORDER BY number_of_spaceships DESC;
+  SQL
 end
 
 def alien_count_for_spaceships
     # Return each spaceships's name and how many aliens are aboard each spaceship
-    "SELECT spaceships.name, COUNT(*) AS number_of_aliens FROM spaceships
-    INNER JOIN aliens
+    <<-SQL
+    SELECT spaceships.name, COUNT(aliens.id) AS number_of_aliens FROM aliens
+    INNER JOIN spaceships
     ON spaceships.id = aliens.spaceship_id
-    GROUP BY spaceships.id;"
+    GROUP BY spaceships.id
+    ORDER BY number_of_aliens DESC;
+    SQL
 end
 
 def alien_count_for_planets
-    #
-    "SELECT planets.name, COUNT(*) FROM aliens
-    LEFT JOIN spaceships
-    ON spaceships.id = aliens.spaceship_id
-    INNER JOIN planets
-    ON planets.id = spaceships.planet_id
-    GROUP BY planet_id;"
+   <<-SQL
+   SELECT planets.name, COUNT(aliens.id) AS number_of_aliens FROM aliens
+   INNER JOIN spaceships
+   ON spaceships.id = aliens.spaceship_id
+   INNER JOIN planets
+   ON planets.id = spaceships.planet_id
+   GROUP BY planets.id
+   ORDER BY number_of_aliens DESC;
+   SQL
 
 end
 
 def order_planets_by_aliens
    # Order the planets from most number of aliens to least number of aliens
+   <<-SQL
+   SELECT planets.name FROM aliens
+   INNER JOIN spaceships
+   ON spaceships.id = aliens.spaceship_id
+   INNER JOIN planets
+   ON planets.id = spaceships.planet_id
+   GROUP BY planets.id
+   ORDER BY COUNT(aliens.id) DESC;
+   SQL
 end
 
 def spaceshisps_with_blue_aliens
@@ -108,7 +143,20 @@ def spaceshisps_with_blue_aliens
 end
 
 def spaceship_and_alien_count
-  # return a count of all spaceships from a planet and the total number of aliens from that planet
+  <<-SQL
+  SELECT planets.name,
+  COUNT(cool_table.number_of_aliens) AS number_of_spaceships,
+  SUM(cool_table.number_of_aliens) AS number_of_aliens
+  FROM planets
+  INNER JOIN (
+     SELECT spaceships.name AS spaceship_name, spaceships.planet_id AS planet_id, COUNT(aliens.id) AS number_of_aliens FROM aliens
+     LEFT JOIN spaceships
+     ON spaceships.id = aliens.spaceship_id
+     GROUP BY spaceships.id
+  ) AS cool_table
+  ON cool_table.planet_id = planets.id
+  GROUP BY planets.id;
+  SQL
 end
 
 def order_planets_by_alien_count
@@ -118,4 +166,14 @@ end
 def order_planets_by_old_alien_count
    ## MOST DIFFICULT
    # order the planets based on how many aliens over the age of 100 are from that planet
+   <<-SQL
+   SELECT planets.name FROM aliens
+   INNER JOIN spaceships
+   ON spaceships.id = aliens.spaceship_id
+   INNER JOIN planets
+   ON spaceships.planet_id = planets.id
+   WHERE aliens.age > 100
+   GROUP BY planets.id
+   ORDER BY COUNT(aliens.id) DESC;
+   SQL
 end
